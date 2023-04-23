@@ -1157,6 +1157,12 @@ public class InAppBrowser extends CordovaPlugin {
             boolean override = false;
             boolean useBeforeload = false;
             String errorMessage = null;
+            // <customized>
+            // handle back to application redirect without processing url by webView
+            final Intent customSchemeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            final PackageManager packageManager = cordova.getActivity().getApplicationContext().getPackageManager();
+            final List<ResolveInfo> resolvedActivities = packageManager.queryIntentActivities(customSchemeIntent, 0);
+            // </customized>
 
             if (beforeload.equals("yes") && method == null) {
                 useBeforeload = true;
@@ -1245,6 +1251,13 @@ public class InAppBrowser extends CordovaPlugin {
             }
             // Test for whitelisted custom scheme names like mycoolapp:// or twitteroauthresponse:// (Twitter Oauth Response)
             else if (!url.startsWith("http:") && !url.startsWith("https:") && url.matches("^[A-Za-z0-9+.-]*://.*?$")) {
+                // <customized>
+                if(resolvedActivities.size() > 0) {
+                    cordova.getActivity().startActivity(customSchemeIntent);
+                    closeDialog();
+                    return true;
+                }
+                // </customized>
                 if (allowedSchemes == null) {
                     String allowed = preferences.getString("AllowedSchemes", null);
                     if(allowed != null) {
