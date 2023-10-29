@@ -32,7 +32,7 @@ You can show helpful articles, videos, and web resources inside of your app. Use
 
 This plugin provides a web browser view that displays when calling `cordova.InAppBrowser.open()`.
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
 
 ### `window.open`
 
@@ -166,7 +166,7 @@ instance, or the system browser.
 
 ### Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
     var ref2 = cordova.InAppBrowser.open(encodeURI('http://ja.m.wikipedia.org/wiki/ハングル'), '_blank', 'location=yes');
 
 ### OSX Quirks
@@ -221,6 +221,7 @@ The object returned from a call to `cordova.InAppBrowser.open` when the target i
   - __exit__: event fires when the `InAppBrowser` window is closed.
   - __beforeload__: event fires when the `InAppBrowser` decides whether to load an URL or not (only with option `beforeload` set).
   - __message__: event fires when the `InAppBrowser` receives a message posted from the page loaded inside the `InAppBrowser` Webview.
+  - __download__: _(Android Only)_ event fires when the `InAppBrowser` loads a URL that leads in downloading of a file.
 
 - __callback__: the function that executes when the event fires. The function is passed an `InAppBrowserEvent` object as a parameter.
 
@@ -321,19 +322,42 @@ function messageCallBack(params){
 }
 
 ```
+#### Download event Example
+
+Whenever the InAppBrowser receives or locates to a url which leads in downloading a file, the callback assigned to the "download" event is called. The parameter passed to this callback is an object with the the following properties
+
+- **type** _it contains the String value "download" always_
+- **url** _The url that leaded to the downloading of file. Basically, the download link of file_
+- **userAgent** _User Agent of the webview_
+- **contentDisposition** _If the url contains "content-disposition" header, then this property holds the value of that field else this field is empty_
+- **contentLength** _If the link of the file allows to obtain file size then this property holds the file size else it contains int value 0_
+- **mimetype** _The MIME type of the file_
+
+```
+
+function downloadListener(params){
+    var url = params.url;
+    var mimetype = params.mimetype;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", params.url);
+    xhr.onload = function() {
+        var content = xhr.responseText;
+    };
+    xhr.send();
+
+}
+
+```
+
 
 ### InAppBrowserEvent Properties
 
 - __type__: the eventname, either `loadstart`, `loadstop`, `loaderror`, `message` or `exit`. _(String)_
-
 - __url__: the URL that was loaded. _(String)_
-
 - __code__: the error code, only in the case of `loaderror`. _(Number)_
-
 - __message__: the error message, only in the case of `loaderror`. _(String)_
-
 - __data__: the message contents , only in the case of `message`. A stringified JSON object. _(String)_
-
 
 ### Supported Platforms
 
@@ -353,7 +377,7 @@ function messageCallBack(params){
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
     ref.addEventListener('loadstart', function(event) { alert(event.url); });
 
 ## InAppBrowser.removeEventListener
@@ -371,6 +395,7 @@ function messageCallBack(params){
   - __loaderror__: event fires when the `InAppBrowser` encounters an error loading a URL.
   - __exit__: event fires when the `InAppBrowser` window is closed.
   - __message__: event fires when the `InAppBrowser` receives a message posted from the page loaded inside the `InAppBrowser` Webview.
+  - __download__: _(Android only)_ event fires when the `InAppBrowser` loads a URL that leads in downloading of a file.
 
 - __callback__: the function to execute when the event fires.
 The function is passed an `InAppBrowserEvent` object.
@@ -384,7 +409,7 @@ The function is passed an `InAppBrowserEvent` object.
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
     var myCallback = function(event) { alert(event.url); }
     ref.addEventListener('loadstart', myCallback);
     ref.removeEventListener('loadstart', myCallback);
@@ -406,7 +431,7 @@ The function is passed an `InAppBrowserEvent` object.
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
     ref.close();
 
 ## InAppBrowser.show
@@ -426,7 +451,7 @@ The function is passed an `InAppBrowserEvent` object.
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'hidden=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'hidden=yes');
     // some time later...
     ref.show();
 
@@ -446,7 +471,7 @@ The function is passed an `InAppBrowserEvent` object.
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank');
     // some time later...
     ref.hide();
 
@@ -478,7 +503,7 @@ The function is passed an `InAppBrowserEvent` object.
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
     ref.addEventListener('loadstop', function() {
         ref.executeScript({file: "myscript.js"});
     });
@@ -513,7 +538,7 @@ Due to [MSDN docs](https://msdn.microsoft.com/en-us/library/windows.ui.xaml.cont
 
 ### Quick Example
 
-    var ref = cordova.InAppBrowser.open('http://apache.org', '_blank', 'location=yes');
+    var ref = cordova.InAppBrowser.open('https://apache.org', '_blank', 'location=yes');
     ref.addEventListener('loadstop', function() {
         ref.insertCSS({file: "mystyles.css"});
     });
@@ -695,13 +720,13 @@ iab.open('local-url.html', 'random_string', 'location=no'); // loads in the InAp
 ```
 var iab = cordova.InAppBrowser;
 
-iab.open('http://whitelisted-url.com');                  // loads in the Cordova WebView
-iab.open('http://whitelisted-url.com', '_self');         // loads in the Cordova WebView
-iab.open('http://whitelisted-url.com', '_system');       // loads in the system browser
-iab.open('http://whitelisted-url.com', '_blank');        // loads in the InAppBrowser
-iab.open('http://whitelisted-url.com', 'random_string'); // loads in the InAppBrowser
+iab.open('https://whitelisted-url.com');                  // loads in the Cordova WebView
+iab.open('https://whitelisted-url.com', '_self');         // loads in the Cordova WebView
+iab.open('https://whitelisted-url.com', '_system');       // loads in the system browser
+iab.open('https://whitelisted-url.com', '_blank');        // loads in the InAppBrowser
+iab.open('https://whitelisted-url.com', 'random_string'); // loads in the InAppBrowser
 
-iab.open('http://whitelisted-url.com', 'random_string', 'location=no'); // loads in the InAppBrowser, no location bar
+iab.open('https://whitelisted-url.com', 'random_string', 'location=no'); // loads in the InAppBrowser, no location bar
 
 ```
 
@@ -710,11 +735,11 @@ iab.open('http://whitelisted-url.com', 'random_string', 'location=no'); // loads
 ```
 var iab = cordova.InAppBrowser;
 
-iab.open('http://url-that-fails-whitelist.com');                  // loads in the InAppBrowser
-iab.open('http://url-that-fails-whitelist.com', '_self');         // loads in the InAppBrowser
-iab.open('http://url-that-fails-whitelist.com', '_system');       // loads in the system browser
-iab.open('http://url-that-fails-whitelist.com', '_blank');        // loads in the InAppBrowser
-iab.open('http://url-that-fails-whitelist.com', 'random_string'); // loads in the InAppBrowser
-iab.open('http://url-that-fails-whitelist.com', 'random_string', 'location=no'); // loads in the InAppBrowser, no location bar
+iab.open('https://url-that-fails-whitelist.com');                  // loads in the InAppBrowser
+iab.open('https://url-that-fails-whitelist.com', '_self');         // loads in the InAppBrowser
+iab.open('https://url-that-fails-whitelist.com', '_system');       // loads in the system browser
+iab.open('https://url-that-fails-whitelist.com', '_blank');        // loads in the InAppBrowser
+iab.open('https://url-that-fails-whitelist.com', 'random_string'); // loads in the InAppBrowser
+iab.open('https://url-that-fails-whitelist.com', 'random_string', 'location=no'); // loads in the InAppBrowser, no location bar
 
 ```
